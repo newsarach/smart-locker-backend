@@ -30,10 +30,24 @@ if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
         console.error('Error: FIREBASE_SERVICE_ACCOUNT_KEY_PATH or GOOGLE_APPLICATION_CREDENTIALS_JSON is not set in .env file or environment.');
         process.exit(1);
     }
-    serviceAccount = require(serviceAccountPath);
-    firebaseProjectId = serviceAccount.project_id;
+
+    try {
+        // Load service account key data from the path specified in .env
+        serviceAccount = require(serviceAccountPath);
+        firebaseProjectId = serviceAccount.project_id;
+        console.log(`Firebase service account loaded from file: ${serviceAccountPath}`);
+    } catch (error) {
+        console.error(`Error loading service account key from ${serviceAccountPath}:`, error.message);
+        console.error('Please ensure the path in your .env file is correct and the file exists.');
+        process.exit(1); // Exit if file cannot be loaded
+    }
 }
 
+// Ensure project_id is found
+if (!firebaseProjectId) {
+    console.error('Error: Could not find project_id in the service account key data.');
+    process.exit(1);
+}
 // Initialize the Firebase Admin SDK
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -105,6 +119,7 @@ app.post('/clear-notifications', async (req, res) => {
 // Start the server
 // ===============================================
 app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+    console.log(`Backend server listening on port ${port}`);
+    // Display the Project ID retrieved directly from serviceAccount
+    console.log(`Firebase Project ID: ${firebaseProjectId}`);
 });
-
