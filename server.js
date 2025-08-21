@@ -48,11 +48,12 @@ if (!firebaseProjectId) {
     console.error('Error: Could not find project_id in the service account key data.');
     process.exit(1);
 }
+
 // Initialize the Firebase Admin SDK
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    // Use the retrieved project ID to set databaseURL
-    databaseURL: `https://${firebaseProjectId}.firebaseio.com`
+    // แก้ไขตรงนี้ให้เป็น URL ของฐานข้อมูลที่ถูกต้องในโซน asia-southeast1
+    databaseURL: "https://smart-parcel-locker-default-rtdb.asia-southeast1.firebasedatabase.app"
 });
 
 // Get a reference to the database service
