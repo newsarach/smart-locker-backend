@@ -55,6 +55,9 @@ admin.initializeApp({
     databaseURL: `https://${firebaseProjectId}.firebaseio.com`
 });
 
+// Get a reference to the database service
+const database = admin.database();
+
 // Middleware
 // Allow access from all origins (*) for testing. For production, restrict origins
 app.use(cors({ origin: '*' }));
@@ -87,7 +90,34 @@ app.post('/api/login', (req, res) => {
     }
 });
 
+// ===============================================
+// New API Endpoint for Clearing Notifications
+// ===============================================
+app.post('/clear-notifications', async (req, res) => {
+    const { lockerId } = req.body;
+    
+    // Check if lockerId is provided
+    if (!lockerId) {
+        return res.status(400).json({ error: 'Locker ID is required.' });
+    }
+    
+    // Reference the path of notifications in Firebase
+    const notificationsRef = database.ref(`lockers/${lockerId}/notifications`);
+    
+    try {
+        // Use .remove() to delete all data at the specified path
+        await notificationsRef.remove();
+        console.log(`Notifications for locker ${lockerId} cleared.`);
+        res.status(200).json({ message: 'Notifications cleared successfully.' });
+    } catch (error) {
+        console.error(`Error clearing notifications for locker ${lockerId}:`, error);
+        res.status(500).json({ error: 'Failed to clear notifications.', details: error.message });
+    }
+});
+
+// ===============================================
 // Start the server
+// ===============================================
 app.listen(port, () => {
     console.log(`Backend server listening on port ${port}`);
     // Display the Project ID retrieved directly from serviceAccount
