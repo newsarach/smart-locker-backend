@@ -125,20 +125,14 @@ app.post('/reset-parcel-count', async (req, res) => {
         return res.status(400).json({ error: 'Locker ID is required.' });
     }
 
-    // Reference the paths in Firebase
+    // Reference the path of parcelCount in Firebase
     const parcelCountRef = database.ref(`lockers/${lockerId}/status/parcelCount`);
-    // เพิ่มการอ้างอิงถึง path สำหรับส่งคำสั่งรีเซ็ตไปยัง Arduino
-    const resetCommandRef = database.ref(`lockers/${lockerId}/control/resetCommand`);
 
     try {
         // Set the value of parcelCount to 0
         await parcelCountRef.set(0);
-
-        // ส่งคำสั่งรีเซ็ตไปยัง Arduino ผ่าน Firebase
-        await resetCommandRef.set("RESET");
-
         console.log(`Parcel count for locker ${lockerId} reset to 0.`);
-        res.status(200).json({ message: 'Parcel count and reset command sent successfully.' });
+        res.status(200).json({ message: 'Parcel count reset successfully.' });
     } catch (error) {
         console.error(`Error resetting parcel count for locker ${lockerId}:`, error);
         res.status(500).json({ error: 'Failed to reset parcel count.', details: error.message });
