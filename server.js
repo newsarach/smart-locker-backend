@@ -117,6 +117,31 @@ app.post('/clear-notifications', async (req, res) => {
 });
 
 // ===============================================
+// New API Endpoint for Resetting Parcel Count
+// ===============================================
+app.post('/reset-parcel', async (req, res) => {
+    const { lockerId } = req.body;
+    
+    // Check if lockerId is provided
+    if (!lockerId) {
+        return res.status(400).json({ error: 'Locker ID is required.' });
+    }
+    
+    // Reference the path of parcel count in Firebase
+    const parcelCountRef = database.ref(`lockers/${lockerId}/parcelCount`);
+    
+    try {
+        // Set parcelCount to 0
+        await parcelCountRef.set(0);
+        console.log(`Parcel count for locker ${lockerId} has been reset to 0.`);
+        res.status(200).json({ message: 'Parcel count reset successfully.' });
+    } catch (error) {
+        console.error(`Error resetting parcel count for locker ${lockerId}:`, error);
+        res.status(500).json({ error: 'Failed to reset parcel count.', details: error.message });
+    }
+});
+
+// ===============================================
 // Start the server
 // ===============================================
 app.listen(port, () => {
